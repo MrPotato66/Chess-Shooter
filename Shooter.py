@@ -49,6 +49,19 @@ class Color:
         self.opposite = opposite
         self.ownPieces = ownPieces
         self.oppositePieces = oppositePieces
+       
+#Color class has the opposite color and the lists of pieces as attributes (own and enemy pieces)
+#White's opposite is black, white's opposite pieces are black own pieces and vice versa
+#Empty's opposite is just the string 'empty' as I only call the opposite attribute when color is different than empty
+
+#I use a global variable called board which is the matrix that stores the information of every piece
+#Each one of these is distinguished by its color and its index on the color ownPieces list
+#That's why on board every case stocks a tuple (color, ind) that spots every piece
+#If a case is empty by convention it's filled with the tuple (empty, 0)
+
+#I choosed this kind of structure because stocking directly every piece on a global matrix would require to create an empty piece
+#that has the same attributes than all other pieces. I'm not pretty sure about how this would work but we can always try to 
+#implement this other form of structure
 
 class Piece:
     
@@ -63,6 +76,8 @@ class Piece:
         self._color.ownPieces.append(self)
         self._color.opposite.oppositePieces.append(self)
         
+    #When a piece is initialized it's appended to it's own color list of pieces and to the opposite too
+        
     def valid_space(self):
         pos = []
         for dl in self._moves:
@@ -71,6 +86,8 @@ class Piece:
                 if board[self.x+dx][self.y+dy][0]!=self._color:
                     pos.append((self.x+dx, self.y+dy))
         return pos
+    
+    #valid_space returns the positions where a piece can move, considering the own color ones but also the edges
     
     def move(self, i, j):
         if (i, j) in self.valid_space():
@@ -117,6 +134,8 @@ class Squire(Piece):
             textColor = 'Black'
         print('A '+textColor+' Squire has been created')
         
+    #A Squire has a shield level, it's value here is 3: you have to shoot him 3 times to manage to kill him
+        
     def draw(self, surface):
         if self.alive:
             surface.blit(self._img, (self.x*dist, self.y*dist))
@@ -145,12 +164,16 @@ class Shooter(Piece):
                     spots.append(((self.x+i), (self.y+j)))
         return spots
     
+    #A Shooter can shoot at any direction: there is friend fire. If you shoot to a partner piece it will affect it just as much
+    #as if it was on the other team. Shooter's ammunition is finite and it's initial value is 5.
+    
     def draw(self, surface):
         if self.alive:
             surface.blit(self._img, (self.x*dist, self.y*dist))
             ammoDisp = myfont.render(str(self.ammo), False, (0, 0, 0))
             surface.blit(ammoDisp, (self.x*dist, self.y*dist-5))
-
+            
+    #Here ammoDisp is just a Surface object that contains the string containing the value of a Shooter's ammo
     
     def drawAiming(self, surface):
         for pos in self.valid_aiming():
@@ -182,6 +205,9 @@ class Bullet:
         temp = [(-d, -d), (-d, d), (-d, 3*d), (d, 3*d), (3*d, 3*d), (3*d, d), (3*d, -d), (d, -d), (0, 0)]
         i = shooterAiming.index((self.dirnx, self.dirny))
         return temp[i]            
+    
+    #As a bullet hits everybody the same way no matter what the color is I had to use an initial translation so the bullet does not
+    #kill the shooter at the very beginning
         
     def move(self):
         if (self.x+self.dirnx)>=0 and (self.x+self.dirnx)<width and (self.y+self.dirny)>=0 and (self.y+self.dirny)<height:
