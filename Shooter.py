@@ -185,8 +185,8 @@ class Shooter(Piece):
                 
 class Bullet:    
     
-    #bullet position is not an int on the grid but real coordinates on the surface display
-    #thanks to that it's easier to display it while moving
+#Bullet position is not the index of a case on the grid but real coordinates on the surface display
+#Thanks to that it's easier to display it while moving
     
     def __init__(self, x, y, dirnx, dirny, color, img):
         self.x = x
@@ -232,6 +232,9 @@ class Bullet:
             else:
                 color.ownPieces[ind].alive = False
                 board[self.x//dist][self.y//dist] = (empty, 0)
+                
+#While a bullet is triggered it appears on the screen and the function collide is executed: it tests if the bullet position in the board
+#is occupied by any piece. If it's the case then depending if it's a Squire or not the piece is killed or not.
 
     def reset(self):
         self.x = 0
@@ -314,6 +317,18 @@ def interaction():
         blackBall.collide()
     if blackBall.collided:
         blackBall.reset()
+        
+#Here is the big function: the for loop keeps turning while any event happens. Two main different cases appear: left button is pressed
+#(pres[0]) and right button is pressed (pres[2]). As this function is being called constantly we must store the chosen pieces or the
+#bullet in global variables that are not reset every time this function is called.
+#In the first case we get the position in the grid of the cursor (posx, posy) and then we check wether or not there is already a 
+#chosen piece. If it's not the case and (posx, posy) is not empty then we choose the one in there. If there is already a chosen one
+#and (posx, posy) is in a valid spot where we can move then the piece is moved there.
+#If the right button is pressed, and the chosen piece is a shooter then we check if we have ammo and if the direction where we aim is a
+#valid one and after that we affect the bullet its direction and original position. As the 2 players will decide at the same time what
+#to do, it could happen that both of them shoot at the same time. That's why both a white and black bullet are created. 
+#Finally we move the ball and test its collision outside of the event loop, because if we do it inside the loop the ball will only move
+#if new events keep happening.
                     
             
 def show_board():
@@ -326,7 +341,8 @@ def show_board():
             elif color==black:
                 temp[j][i] = 'black'
     print(temp)
-
+  
+#A testing function that shows what's the color occupying a place on the board.
                 
 def drawBoard(surface):
     for i in range(rows):
@@ -357,8 +373,11 @@ def redrawWindow(surface):
         whiteBall.draw(surface)
     if blackBall.triggered:
         blackBall.draw(surface)
-
     pygame.display.update()
+    
+#We must draw the background first as every piece image has a transparent background. When a piece is chosen, the moving available spots
+#and the shooting directions are drawed with different colors to make them visible. If we first drew the item's images and then the 
+#moving or aiming spots we wouldn't see any piece that would be placed there.
     
 def main():
     global board, white, black, empty, win, whiteBall, blackBall, chosenPiece
@@ -391,6 +410,8 @@ def main():
         board[whiteItem.x][whiteItem.y] = (white, ind)
     for ind, blackItem in enumerate(black.ownPieces):
         board[blackItem.x][blackItem.y] = (black, ind)
+        
+#here the board is filled with the information of every piece
                         
     while whiteKing.alive and blackKing.alive:
         clock.tick(90)
