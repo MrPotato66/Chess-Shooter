@@ -57,9 +57,8 @@ def interaction():
                         chosenPiece = []
                         chosenColor.ownPieces[chosenInd] = piece
 
-
 def update(g):
-    global board, moving, player
+    global board, moving, player, ownBullet, oppositeBullet
 
     white_move = g.moves[0]
     w_originx, w_originy = white_move.origin
@@ -77,6 +76,13 @@ def update(g):
         if player == 0:
             ownBullet.triggered = True
         else:
+            print('We are setting opposite\'s bullet parameters')
+            oppositeBullet.dirnx = normalize(w_destx - w_originx)
+            oppositeBullet.dirny = normalize(w_desty - w_originy)
+            oppositeBullet.x = w_originx * dist + oppositeBullet.biais()[0]
+            oppositeBullet.y = w_originy * dist + oppositeBullet.biais()[1]
+            oppositeBullet.colx = w_destx
+            oppositeBullet.coly = w_desty
             oppositeBullet.triggered = True
         moving = True
 
@@ -88,7 +94,7 @@ def update(g):
     if black_move.nature == 'moving':
         piece.move(b_destx, b_desty, board)
         if board[b_destx][b_desty][0] == white:
-            w_killedPiece = white.ownPieces[board[w_destx][w_desty][1]]
+            w_killedPiece = white.ownPieces[board[b_destx][b_desty][1]]
             if type(w_killedPiece) == King:
                 g.king0Alive = False
     elif black_move.nature == 'shooting':
@@ -96,9 +102,23 @@ def update(g):
         if player == 1:
             ownBullet.triggered = True
         else:
+            print('We are setting opposite\'s bullet parameters')
+            oppositeBullet.dirnx = normalize(b_destx - b_originx)
+            oppositeBullet.dirny = normalize(b_desty - b_originy)
+            oppositeBullet.x = b_originx * dist + oppositeBullet.biais()[0]
+            oppositeBullet.y = b_originy * dist + oppositeBullet.biais()[1]
+            oppositeBullet.colx = b_destx
+            oppositeBullet.coly = b_desty
             oppositeBullet.triggered = True
         moving = True
 
+
+
+def normalize(x):
+    if x == 0:
+        return 0
+    else:
+        return x//abs(x)
 
 def drawBoard(surface):
     for i in range(rows):
@@ -174,8 +194,10 @@ def main():
         pColor = black
     ownBullet = Bullet(0, 0, 0, 0, pColor, bulletImg)
     oppositeBullet = Bullet(0, 0, 0, 0, pColor.opposite, bulletImg)
+    counter = 0
 
     while run:
+        counter += 1
         clock.tick(60)
         if not moving:
             try:
@@ -189,25 +211,20 @@ def main():
             interaction()
             if game.bothWent():
                 print('Both players went')
-                game.moves[0].print_move('white')
-                game.moves[1].print_move('black')
                 update(game)
                 waiting = False
                 sent_move.reset = True
         else:
             if ownBullet.triggered:
                 ownBullet.move()
-                print('Own bullet is moving')
             if oppositeBullet.triggered:
                 oppositeBullet.move()
-                print('Opposite bullet is moving')
             if ownBullet.collided:
                 ownBullet.collide(board)
             if oppositeBullet.collided:
                 oppositeBullet.collide(board)
             if (not ownBullet.triggered) and (not oppositeBullet.triggered):
                 moving = False
-                print('We are not moving anymore')
         redrawWindow(win)
 
     pygame.quit()
