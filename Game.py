@@ -1,3 +1,5 @@
+from random import randint
+
 class Game:
     def __init__(self):
         self.p0Went = False
@@ -6,6 +8,7 @@ class Game:
         self.ready = False
         self.king0Alive = True
         self.king1Alive = True
+        self.preference = randint(0, 1)
 
     def get_player_move(self, player):
         return self.moves[player]
@@ -16,6 +19,7 @@ class Game:
             self.p0Went = True
         else:
             self.p1Went = True
+        self.preference = randint(0, 1)
 
     def connected(self):
         return self.ready
