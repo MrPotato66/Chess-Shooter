@@ -64,15 +64,29 @@ def update(g):
     w_originx, w_originy = white_move.origin
     _, w_ind = board[w_originx][w_originy]
     w_destx, w_desty = white_move.destination
-    piece = white.ownPieces[w_ind]
-    if white_move.nature == 'moving':
-        piece.move(w_destx, w_desty, board)
+    w_piece = white.ownPieces[w_ind]
+    
+    black_move = g.moves[1]
+    b_originx, b_originy = black_move.origin
+    _, b_ind = board[b_originx][b_originy]
+    b_destx, b_desty = black_move.destination
+    b_piece = black.ownPieces[b_ind]
+    
+    if white_move.nature == 'moving' and black_move.nature == 'moving' and (w_destx, w_desty) == (b_destx, b_desty):
+        if preference == 0:
+            w_piece.move(w_destx, w_desty, board)
+            b_piece.alive = False
+        else:
+            b_piece.move(w_destx, w_desty, board)
+            w_piece.alive = False
+    elif white_nature == 'moving':
+        w_piece.move(w_destx, w_desty, board)
         if board[w_destx][w_desty][0] == black:
             b_killedPiece = black.ownPieces[board[w_destx][w_desty][1]]
             if type(b_killedPiece) == King:
                 g.king1Alive = False
     elif white_move.nature == 'shooting':
-        piece.ammo -= 1
+        w_piece.ammo -= 1
         if player == 0:
             ownBullet.triggered = True
         else:
@@ -86,19 +100,14 @@ def update(g):
             oppositeBullet.triggered = True
         moving = True
 
-    black_move = g.moves[1]
-    b_originx, b_originy = black_move.origin
-    _, b_ind = board[b_originx][b_originy]
-    b_destx, b_desty = black_move.destination
-    piece = black.ownPieces[b_ind]
-    if black_move.nature == 'moving':
-        piece.move(b_destx, b_desty, board)
+    elif black_move.nature == 'moving':
+        b_piece.move(b_destx, b_desty, board)
         if board[b_destx][b_desty][0] == white:
             w_killedPiece = white.ownPieces[board[b_destx][b_desty][1]]
             if type(w_killedPiece) == King:
                 g.king0Alive = False
     elif black_move.nature == 'shooting':
-        piece.ammo -= 1
+        b_piece.ammo -= 1
         if player == 1:
             ownBullet.triggered = True
         else:
@@ -190,14 +199,15 @@ def main():
     n = Network()
     player = int(n.getP())
     pColor = white
+    knowledge = True
     if player == 1:
         pColor = black
+        knowledge = False
     ownBullet = Bullet(0, 0, 0, 0, pColor, bulletImg)
     oppositeBullet = Bullet(0, 0, 0, 0, pColor.opposite, bulletImg)
-    counter = 0
+    rounds = 0
 
     while run:
-        counter += 1
         clock.tick(60)
         if not moving:
             try:
@@ -208,10 +218,16 @@ def main():
                 run = False
                 print('Could not get game')
                 break
+            preference = game.preference
             interaction()
             if game.bothWent():
                 print('Both players went')
                 update(game)
+                rounds += 1
+                if (rounds%2) == player:
+                    knowledge = True
+                else:
+                    knowledge = False
                 waiting = False
                 sent_move.reset = True
         else:
