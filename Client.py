@@ -4,6 +4,8 @@ from Game import *
 
 pygame.init()
 
+text_font = 
+
 
 def interaction():
     global chosenPiece, board, waiting, sent_move
@@ -139,6 +141,7 @@ def drawBoard(surface):
 
 
 def redrawWindow(surface):
+    surface.fill((255, 255, 255))
     drawBoard(surface)
     for white_item in white.ownPieces:
         if white_item.chosen:
@@ -162,6 +165,13 @@ def redrawWindow(surface):
         pygame.draw.rect(surface, (255, 0, 0), (0, 0, 10, 10))
     elif player == 1 and game.p1Went:
         pygame.draw.rect(surface, (255, 0, 0), (0, 0, 10, 10))
+    if knowledge:
+        prefmsg = text_font.render('Preference goes for:', False, (0, 0, 0))
+        surface.blit(prefmsg, pwidth+20, 50)
+        if preference == 0:
+            surface.draw.circle(surface, (255, 255, 255), pwidth+ 110, 10)
+        else:
+            surface.draw.circle(surface, (0, 0, 0), pwidth+ 110, 10)
     pygame.display.update()
 
 
