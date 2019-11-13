@@ -14,10 +14,10 @@ class Color:
         self.ownPieces = ownPieces
 
 
-width = 400
-height = 400
+width = 600
+height = 450
 rows = 8
-dist = width // rows
+dist = 50
 
 
 backWhite = (250, 236, 192)
